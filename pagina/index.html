@@ -138,16 +138,16 @@
 
         let conectado = false;
         const intentarConexion = setInterval(() => {
-            fetch(apiUrl).then(res => {
-                if (!conectado) {
+            if (!conectado) {
+                fetch(apiUrl).then(res => {
                     estado.textContent = "Servicio funcionando.";
                     clearInterval(intentarConexion);
                     conectado = true;
                     panelOculto.style.display = "block";
-                }
-            }).catch(err => {
-                estado.textContent = "Error del servidor.";
-            });
+                }).catch(err => {
+                    estado.textContent = "Error del servidor.";
+                });
+            }
         }, 2000);
 
 
