@@ -47,11 +47,10 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 def index():
     cargado = modelo.modeloCargado()
 
-    if cargado == True:
-        return { "msg": "Servicio funcionando." }
-    else:
+    if cargado == False:
         modelo.cargar_modelo()
-        return Response("", 500)
+        
+    return { "msg": "Servicio funcionando." }
 
 @app.route("/predecir", methods=['POST'])
 @cross_origin()
