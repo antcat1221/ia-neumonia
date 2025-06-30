@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Neumonía</title>
+</head>
+<body>
+
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .encabezado > h1, .encabezado > h2, .encabezado > h3 {
+            text-align: center;
+        }
+
+
+        #formulario {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+
+            background-color: aliceblue;
+            border: gray solid 1px;
+            padding: 2rem;
+            margin-bottom: 1rem;
+        }
+
+        #panel-resultados {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2rem;
+            
+            background-color: antiquewhite;
+            border: gray solid 1px;
+            padding: 2rem;
+        }
+
+        #imagen {
+            padding: 1rem 0;
+            width: 100%;
+            max-width: 400px;
+        }
+    </style>
+
+    <div class="encabezado">
+        <h1>UNIVERSIDAD PRIVADA ANTENOR ORREGO</h1>
+        <h2>INGENIERÍA DE SISTEMAS E INTELIGENCIA ARTIFICIAL</h2>
+        <h2>INTELIGENCIA ARTIFICAL: PRINCIPIOS Y TÉCNICAS</h2>
+    </div>
+
+    <div>
+        <h3>Información general</h3>
+        <div>Repositorio: <a href="" target="_blank">Github</a></div>
+        <div>Data-Set: <a href="https://www.kaggle.com/datasets/paultimothymooney/chest-xray-pneumonia" target="_blank">paultimothymooney - chest-xray-pneumonia</a></div>
+    </div>
+
+    <div id="estado-servicio">Esperando el servicio...</div>
+    <div id="oculto" style="display: none;">
+        <form id="formulario" method="post" enctype="multipart/form-data">
+            <h3>Selecciona una imagen</h3>
+            <div id="estado-form" style="display: none; color: red;"></div>
+            <div>
+                <label for="imagen">Imagen:</label>
+                <input type="file" name="imagen" maxlength="1" required>
+            </div>
+            <button type="submit">Enviar</button>
+        </form>
+
+        <div id="panel-resultados" style="display: none;">
+            <div style="text-align: center;">Imagen enviada</div>
+            <img id="imagen" src="" alt="imagen enviada">
+            <div id="resultado" style="display: none;"></div>
+        </div>
+    </div>
+
+    <script>
+        const apiUrl = "https://ia-neumonia-lqng.onrender.com";
+        const estado = document.querySelector("#estado-servicio");
+        const panelOculto = document.querySelector("#oculto");
+        const form = document.querySelector("#formulario");
+        const estadoForm = document.querySelector("#estado-form");
+
+        const panelResultado = document.querySelector("#panel-resultados");
+        const imagenEnviada = document.querySelector("#imagen");
+        const resultado = document.querySelector("#resultado");
+
+        const mostrarImagen = (imagen) => {
+            var reader = new FileReader();
+            reader.onload = (e) => {
+                imagenEnviada.setAttribute('src', e.target.result);
+            };
+            reader.readAsDataURL(imagen);
+        };
+        
+        const enviarForm = async (evt) => {
+            try {
+                evt.preventDefault();
+
+                if (conectado) {
+                    estadoForm.style.display = "none";
+                    panelResultado.style.display = "none";
+                    const imagen = evt.target.imagen.files[0];
+
+                    const formData = new FormData();
+                    formData.append("imagen", imagen);
+
+                    const res = await fetch(`${apiUrl}/predecir`, {
+                        method: "POST",
+                        body: formData
+                    });
+
+                    const data = await res.json();
+
+                    panelResultado.style.display = "block";
+                    mostrarImagen(imagen);
+
+                    resultado.textContent = `${ data.msg }`;
+                    resultado.style.display = "block";
+                    window.scrollTo(0, document.body.scrollHeight);
+                }
+            } catch(err) {
+                console.log(err);
+                estadoForm.textContent = "Solicitud inválida";
+                estadoForm.style.display = "block";
+                panelResultado.style.display = "none";
+            }
+        };
+        
+        form.addEventListener("submit", enviarForm);
+
+        let conectado = false;
+        const intentarConexion = setInterval(() => {
+            fetch(apiUrl).then(res => {
+                if (!conectado) {
+                    estado.textContent = "Servicio funcionando.";
+                    clearInterval(intentarConexion);
+                    conectado = true;
+                    panelOculto.style.display = "block";
+                }
+            }).catch(err => {
+                estado.textContent = "Error del servidor.";
+            });
+        }, 2000);
+
+
+    </script>
+
+</body>
+</html>
