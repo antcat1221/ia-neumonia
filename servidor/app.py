@@ -35,6 +35,7 @@ class Modelo:
         return { "msg": mensaje }
 
 modelo = Modelo()
+modelo.cargar_modelo()
 
 app = Flask(__name__)
 CORS(app)
@@ -45,11 +46,6 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 @app.route("/", methods=["GET"])
 def index():
-    cargado = modelo.modeloCargado()
-
-    if cargado == False:
-        modelo.cargar_modelo()
-        
     return { "msg": "Servicio funcionando." }
 
 @app.route("/predecir", methods=['POST'])
@@ -66,5 +62,4 @@ def predecir():
             return resultado
 
 if __name__ == '__main__':
-    print(modelo.cargar_modelo())
     app.run(debug=True)
